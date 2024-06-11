@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCE8QrqmNuaGfQnPb78Yly_bwTbEtmQ1Tk",
+            authDomain: "techbeen-52525.firebaseapp.com",
+            databaseURL: "https://techbeen-52525-default-rtdb.firebaseio.com",
+            projectId: "techbeen-52525",
+            storageBucket: "techbeen-52525.appspot.com",
+            messagingSenderId: "181047080416",
+            appId: "1:181047080416:web:d5b6588e2aa0ff70f32785",
+            measurementId: "G-5CKW4XNCJS"
+        };
+        
+
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Handle Google Sign-In
+        function googleSignIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(result => {
+                    const user = result.user;
+                    // Save user info to Firestore
+                    db.collection('users').doc(user.uid).set({
+                        email: user.email,
+                        uid: user.uid,
+                        displayName: user.displayName,
+                        photoURL: user.photoURL,
+                        emailVerified: user.emailVerified,
+                        phoneNumber: user.phoneNumber || 'N/A',
+                        providerId: user.providerData[0].providerId,
+                        metadata: {
+                            creationTime: user.metadata.creationTime,
+                            lastSignInTime: user.metadata.lastSignInTime
+                        },
+                        createdAt: new Date()
+                    }, { merge: true })
+                    .then(() => {
+                        // Redirect to home page
+                        window.location = 'home.html';
+                    })
+                    .catch(error => {
+                        console.error("Error saving user data: ", error);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error signing in with Google: ", error);
+                });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Login</h1>
+        <button class="btn btn-danger" onclick="googleSignIn()">Sign in with Google</button>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
